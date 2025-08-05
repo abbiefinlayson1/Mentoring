@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+type GameObject struct {
+	Description string
+	MoveX       int
+	MoveY       int
+	Win         bool
+}
+
 func main() {
 	// Ask the user for their name and greet them
 	fmt.Println("Welcome to the game! Please enter your name:")
@@ -44,6 +51,30 @@ func main() {
 	directions := []string{"North", "East", "South", "West"}
 	// the direction index starts at 0 = North
 	dirIndex := 0
+
+	objects := map[string]GameObject{
+		"T": {
+			Description: "You have reached a tree.There are apples on it. You grab one to eat... oh no it's poisonous! Go back 2 spaces.",
+			MoveX:       0,
+			MoveY:       -2,
+		},
+		"G": {
+			Description: "A Goblin jumps out and pushes you forward! Move forward one space.",
+			MoveX:       1,
+			MoveY:       0,
+		},
+		"H": {
+			Description: "You spot a house and decide to go in. There is a comfy bed for you to take a nap. You wake up after feeling refreshed and move forward 3 spaces",
+			MoveX:       3,
+			MoveY:       0,
+		},
+		"C": {
+			Description: "You have reached the Castle! Congratulations, you win!",
+			MoveX:       0,
+			MoveY:       0,
+			Win:         true,
+		},
+	}
 
 	for {
 		fmt.Println("\nPress a key to continue or 'Q' to quit:")
@@ -123,15 +154,33 @@ func main() {
 				lookX--
 			}
 
-			if lookX >= 0 && lookX < len(gameMap[0]) && lookY >= 0 && lookY < len(gameMap) {
-				object := gameMap[lookY][lookX]
-				if object == " " {
-					fmt.Println("There is nothing in front of you!")
+			if lookX >= 0 && lookX < len(gameMap[0]) &&
+				lookY >= 0 && lookY < len(gameMap) {
+
+				symbol := gameMap[lookY][lookX]
+				obj, exists := objects[symbol]
+				if exists {
+					fmt.Println(obj.Description)
+
+					newX := x + obj.MoveX
+					newY := y + obj.MoveY
+
+					if newX >= 0 && newX < len(gameMap[0]) {
+						x = newX
+					}
+					if newY >= 0 && newY < len(gameMap) {
+						y = newY
+					}
+
+					if obj.Win {
+						fmt.Println("🎉 You reached the castle and won the game!")
+						break
+					}
 				} else {
-					fmt.Printf("You see a %s in front of you \n", object)
+					fmt.Println("There's nothing in front of you.")
 				}
 			} else {
-				fmt.Println("You have reached the end of the world, please go back!")
+				fmt.Println("You have reached the edge of the map!")
 			}
 		}
 		fmt.Printf("You moved to position (%d, %d)\n", x, y)
